@@ -1,0 +1,41 @@
+package com.example.demo.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "IRCTC-Train-DB")
+public class Train {
+
+	@Id
+	private String trainNo;
+
+	private String trainName;
+	private String time;
+
+	public String getTrainNo() {
+		return trainNo;
+	}
+
+	public void setTrainNo(String trainNo) {
+		this.trainNo = trainNo;
+	}
+
+	public String getTrainName() {
+		return trainName;
+	}
+
+	public void setTrainaName(String trainName) {
+		this.trainName = trainName;
+	}
+
+	public String getTime() {
+		return time;
+	}
+
+	public void setTime(String time) {
+		this.time = time;
+	}
+
+}

@@ -1,0 +1,28 @@
+package com.example.demo.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.example.demo.entity.Train;
+import com.example.demo.repository.TrainRepository;
+
+public class IRCTCServiceImpl implements IRCTCService {
+
+	@Autowired
+	TrainRepository repository;
+
+	@Override
+	public List<Train> getAll() {
+		// TODO Auto-generated method stub
+		return repository.findAll();
+
+	}
+
+	@Override
+	public Train addTrain(Train train) {
+		// TODO Auto-generated method stub
+		return repository.save(train);
+	}
+
+}

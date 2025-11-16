@@ -1,0 +1,20 @@
+@RestController
+@RequestMapping("/irctc")
+@CrossOrigin("*")
+public class IRCTCController {
+
+    @Autowired
+    IRCTCService service;
+
+    // ADD TRAIN
+    @PostMapping("/train")
+    public Train addTrain(@RequestBody Train t) {
+        return service.saveTrain(t);
+    }
+
+    // GET ALL TRAINS
+    @GetMapping("/trains")
+    public List<Train> getTrains() {
+        return service.getAll();
+    }
+}

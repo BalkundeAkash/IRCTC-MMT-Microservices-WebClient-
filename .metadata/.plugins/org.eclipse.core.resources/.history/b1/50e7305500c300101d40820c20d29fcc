@@ -1,0 +1,11 @@
+package com.example.demo.entity;
+
+// Train DTO
+
+public class Train {
+
+	private String trainNo;
+	private String trainName;
+	private String time;
+
+}

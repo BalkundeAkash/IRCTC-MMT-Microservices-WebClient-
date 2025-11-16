@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IRCTC – MMT Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<header class="bg-blue-700 text-white p-5 text-center text-2xl font-bold shadow-lg">
+    IRCTC – MMT Train System
+</header>
+
+<div class="max-w-4xl mx-auto p-6">
+
+    <!-- IRCTC ADD TRAIN -->
+    <section class="bg-white shadow-xl p-6 rounded-xl mb-8">
+        <h2 class="text-xl font-semibold text-blue-700 mb-4">Add Train to IRCTC</h2>
+
+        <form id="irctcForm" class="space-y-4">
+
+            <input class="w-full p-3 border rounded" type="text" id="trainNo" placeholder="Train Number" required>
+
+            <input class="w-full p-3 border rounded" type="text" id="trainName" placeholder="Train Name" required>
+
+            <input class="w-full p-3 border rounded" type="text" id="time" placeholder="Train Time (e.g., 11:00 AM)" required>
+
+            <button class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg">
+                Add Train
+            </button>
+        </form>
+    </section>
+
+    <!-- IRCTC FETCH -->
+    <section class="bg-white shadow-xl p-6 rounded-xl mb-8">
+        <h2 class="text-xl font-semibold text-green-700 mb-4">Fetch IRCTC Trains</h2>
+
+        <button id="fetchIrctcBtn" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg">
+            Get IRCTC Trains
+        </button>
+
+        <div id="irctcResult" class="mt-4"></div>
+    </section>
+
+    <!-- MMT FETCH -->
+    <section class="bg-white shadow-xl p-6 rounded-xl">
+        <h2 class="text-xl font-semibold text-purple-700 mb-4">Fetch MMT Trains (WebClient from IRCTC)</h2>
+
+        <button id="fetchMmtBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg">
+            Get MMT Trains
+        </button>
+
+        <div id="mmtResult" class="mt-4"></div>
+    </section>
+
+</div>
+
+
+<script>
+
+    /* -----------------------------
+        IRCTC POST
+    ------------------------------*/
+    document.getElementById("irctcForm").onsubmit = async function(e) {
+        e.preventDefault();
+
+        const train = {
+            trainNo: document.getElementById("trainNo").value,
+            trainName: document.getElementById("trainName").value,
+            time: document.getElementById("time").value
+        };
+
+        const res = await fetch("http://localhost:8081/irctc/train", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(train)
+        });
+
+        alert("Train Added Successfully!");
+    };
+
+
+    /* -----------------------------
+        IRCTC GET
+    ------------------------------*/
+    document.getElementById("fetchIrctcBtn").onclick = async function () {
+        const res = await fetch("http://localhost:8081/irctc/trains");
+        const data = await res.json();
+
+        showTable("irctcResult", data);
+    };
+
+
+    /* -----------------------------
+        MMT GET (WebClient → IRCTC)
+    ------------------------------*/
+    document.getElementById("fetchMmtBtn").onclick = async function () {
+        const res = await fetch("http://localhost:8082/mmt/search");
+        const data = await res.json();
+
+        showTable("mmtResult", data);
+    };
+
+
+    /* -----------------------------
+        COMMON TABLE FUNCTION
+    ------------------------------*/
+    function showTable(elementId, data) {
+        let html = `
+            <table class="w-full border collapse rounded-lg overflow-hidden mt-4">
+                <thead class="bg-gray-300">
+                    <tr>
+                        <th class="border p-2">Train No</th>
+                        <th class="border p-2">Train Name</th>
+                        <th class="border p-2">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        data.forEach(t => {
+            html += `
+                <tr class="bg-white">
+                    <td class="border p-2">${t.trainNo}</td>
+                    <td class="border p-2">${t.trainName}</td>
+                    <td class="border p-2">${t.time}</td>
+                </tr>`;
+        });
+
+        html += `</tbody></table>`;
+
+        document.getElementById(elementId).innerHTML = html;
+    }
+
+</script>
+
+</body>
+</html>

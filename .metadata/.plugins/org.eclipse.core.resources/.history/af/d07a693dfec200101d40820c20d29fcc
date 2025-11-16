@@ -1,0 +1,35 @@
+package com.example.demo.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.example.demo.IrctcServiceProducerApplication;
+import com.example.demo.entity.Train;
+import com.example.demo.service.IRCTCService;
+
+@RestController
+@RequestMapping("/irctc")
+public class IRCTCController {
+
+	private final IrctcServiceProducerApplication irctcServiceProducerApplication;
+
+	@Autowired
+	IRCTCService irctcService;
+
+	IRCTCController(IrctcServiceProducerApplication irctcServiceProducerApplication) {
+		this.irctcServiceProducerApplication = irctcServiceProducerApplication;
+	}
+
+	public List<Train> getAllTrains() {
+		return irctcService.getAll();
+	}
+
+	public ResponseEntity<Train> add(@RequestBody Train train) {
+		return ResponseEntity.ok(irctcService.addTrain(train));
+	}
+
+}

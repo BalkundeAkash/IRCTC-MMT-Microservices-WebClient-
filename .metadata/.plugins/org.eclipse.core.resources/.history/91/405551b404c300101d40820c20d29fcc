@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Train Search - IRCTC & MMT</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        button {
+            padding: 12px 20px;
+            margin-right: 10px;
+            margin-bottom: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #efefef;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <h1>IRCTC & MMT Train Search</h1>
+
+    <button onclick="getIrctcTrains()">Get IRCTC Trains</button>
+    <button onclick="fetchMmtViaWebClient()">Fetch MMT Trains (WebClient from IRCTC)</button>
+    <button onclick="getMmtTrains()">Get MMT Trains</button>
+
+    <table id="trainTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Train Name</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+
+        // ----------------------------
+        // GET IRCTC TRAINS (PORT 8081)
+        // ----------------------------
+        function getIrctcTrains() {
+            fetch("http://localhost:8081/irctc/trains")
+                .then(res => res.json())
+                .then(data => renderTable(data))
+                .catch(err => console.error("Error:", err));
+        }
+
+        // -------------------------------------------
+        // FETCH MMT TRAINS USING WebClient from IRCTC
+        // -------------------------------------------
+        function fetchMmtViaWebClient() {
+            fetch("http://localhost:8082/mmt/search") 
+                .then(res => res.json())
+                .then(data => renderTable(data))
+                .catch(err => console.error("Error:", err));
+        }
+
+        // -------------------------
+        // GET MMT TRAINS (PORT 8082)
+        // -------------------------
+        function getMmtTrains() {
+            fetch("http://localhost:8082/mmt/trains")
+                .then(res => res.json())
+                .then(data => renderTable(data))
+                .catch(err => console.error("Error:", err));
+        }
+
+        // -------------------------
+        // TABLE RENDER FUNCTION
+        // -------------------------
+        function renderTable(trains) {
+            let tbody = document.querySelector("#trainTable tbody");
+            tbody.innerHTML = "";
+
+            trains.forEach(train => {
+                let row = `
+                    <tr>
+                        <td>${train.id}</td>
+                        <td>${train.trainName}</td>
+                        <td>${train.source}</td>
+                        <td>${train.destination}</td>
+                        <td>${train.price}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+    </script>
+</body>
+</html>

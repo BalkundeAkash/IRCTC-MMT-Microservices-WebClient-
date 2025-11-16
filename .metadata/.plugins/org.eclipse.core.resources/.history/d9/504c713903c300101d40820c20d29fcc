@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MMT & IRCTC Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- HEADER -->
+    <header class="bg-blue-700 text-white p-5 text-center text-2xl font-bold shadow-lg">
+        MMT – IRCTC Train Portal
+    </header>
+
+    <div class="max-w-4xl mx-auto p-6">
+
+        <!-- IRCTC ADD TRAIN FORM -->
+        <section class="bg-white shadow-xl p-6 rounded-xl mb-8">
+            <h2 class="text-xl font-semibold text-blue-700 mb-4">Add Train to IRCTC</h2>
+
+            <form id="irctcForm" class="space-y-4">
+                <input class="w-full p-3 border rounded" type="text" id="trainNo" placeholder="Train Number" required>
+                <input class="w-full p-3 border rounded" type="text" id="src" placeholder="Source" required>
+                <input class="w-full p-3 border rounded" type="text" id="dest" placeholder="Destination" required>
+                <input class="w-full p-3 border rounded" type="text" id="date" placeholder="YYYY-MM-DD" required>
+
+                <button class="bg-blue-700 hover:bg-blue-800 text-white px-5 py-2 rounded-lg">
+                    Add Train
+                </button>
+            </form>
+        </section>
+
+        <!-- IRCTC FETCH ALL -->
+        <section class="bg-white shadow-xl p-6 rounded-xl mb-8">
+            <h2 class="text-xl font-semibold text-green-700 mb-4">Fetch All IRCTC Trains</h2>
+
+            <button id="fetchIrctcBtn" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg">
+                Get IRCTC Trains
+            </button>
+
+            <div id="irctcResult" class="mt-4"></div>
+        </section>
+
+        <!-- MMT SEARCH -->
+        <section class="bg-white shadow-xl p-6 rounded-xl">
+            <h2 class="text-xl font-semibold text-purple-700 mb-4">Fetch MMT Trains (WebClient)</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                <input class="p-3 border rounded" type="text" id="mSrc" placeholder="Source">
+                <input class="p-3 border rounded" type="text" id="mDest" placeholder="Destination">
+                <input class="p-3 border rounded" type="text" id="mDate" placeholder="YYYY-MM-DD">
+            </div>
+
+            <button id="fetchMmtBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg">
+                Search MMT Trains
+            </button>
+
+            <div id="mmtResult" class="mt-4"></div>
+        </section>
+
+        <!-- RESULTS WILL BE SHOWN HERE -->
+        <div class="mt-10" id="finalOutput"></div>
+
+    </div>
+
+<script>
+
+    /* -----------------------------
+        ADD TRAIN TO IRCTC (POST)
+    ------------------------------*/
+    document.getElementById("irctcForm").onsubmit = async function(e) {
+        e.preventDefault();
+
+        const train = {
+            trainNo: document.getElementById("trainNo").value,
+            src: document.getElementById("src").value,
+            dest: document.getElementById("dest").value,
+            date: document.getElementById("date").value,
+        };
+
+        const res = await fetch("http://localhost:8081/irctc/train", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(train)
+        });
+
+        const msg = await res.text();
+
+        document.getElementById("finalOutput").innerHTML = `
+            <div class="bg-blue-100 p-4 rounded-lg border border-blue-300 mt-4">
+                <p class="text-blue-800 font-semibold">IRCTC Response:</p>
+                ${msg}
+            </div>`;
+    };
+
+    /* -----------------------------
+        FETCH IRCTC TRAINS (GET)
+    ------------------------------*/
+    document.getElementById("fetchIrctcBtn").onclick = async function () {
+        const res = await fetch("http://localhost:8081/irctc/trains");
+        const data = await res.json();
+
+        displayTable("IRCTC Train List", data, "irctcResult");
+    };
+
+    /* -----------------------------
+        FETCH MMT TRAINS (GET)
+    ------------------------------*/
+    document.getElementById("fetchMmtBtn").onclick = async function () {
+        const src = document.getElementById("mSrc").value;
+        const dest = document.getElementById("mDest").value;
+        const date = document.getElementById("mDate").value;
+
+        const url = `http://localhost:8082/mmt/search?src=${src}&dest=${dest}&date=${date}`;
+        
+        const res = await fetch(url);
+        const data = await res.json();
+
+        displayTable("MMT Search Results", data, "mmtResult");
+    };
+
+    /* -----------------------------
+        DISPLAY DATA IN TABLE
+    ------------------------------*/
+    function displayTable(title, jsonData, elementId) {
+        let html = `
+            <h3 class="text-lg font-bold mb-3 text-gray-700">${title}</h3>
+            <table class="w-full border collapse rounded-lg overflow-hidden">
+                <thead class="bg-gray-300">
+                    <tr>
+                        <th class="border p-2">Train No</th>
+                        <th class="border p-2">Source</th>
+                        <th class="border p-2">Destination</th>
+                        <th class="border p-2">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        jsonData.forEach(t => {
+            html += `
+                <tr class="bg-white">
+                    <td class="border p-2">${t.trainNo}</td>
+                    <td class="border p-2">${t.src}</td>
+                    <td class="border p-2">${t.dest}</td>
+                    <td class="border p-2">${t.date}</td>
+                </tr>`;
+        });
+
+        html += `</tbody></table>`;
+
+        document.getElementById(elementId).innerHTML = html;
+    }
+
+</script>
+
+</body>
+</html>

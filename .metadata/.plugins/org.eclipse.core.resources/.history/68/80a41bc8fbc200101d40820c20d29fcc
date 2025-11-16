@@ -1,0 +1,21 @@
+package com.example.demo.service;
+
+import java.util.List;
+
+import com.example.demo.entity.Train;
+
+public class IRCTCServiceImpl implements IRCTCService{
+
+	@Override
+	public List<Train> getAll() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Train addTrain(Train train) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

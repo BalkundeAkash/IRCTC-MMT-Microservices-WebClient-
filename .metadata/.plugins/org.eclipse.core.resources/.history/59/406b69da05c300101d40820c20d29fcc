@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IRCTC & MMT Train Search</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h2 {
+            margin-top: 40px;
+            color: #444;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            margin-top: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        input {
+            padding: 10px;
+            width: 220px;
+            margin-right: 10px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #efefef;
+        }
+
+        .form-box {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 60%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>IRCTC & MMT Train Portal</h1>
+
+    <!-- --------------------- -->
+    <!--   ADD TRAIN (POST)    -->
+    <!-- --------------------- -->
+    <h2>Add Train (IRCTC)</h2>
+
+    <div class="form-box">
+        <input type="text" id="trainNo" placeholder="Train No">
+        <input type="text" id="trainName" placeholder="Train Name">
+        <input type="text" id="time" placeholder="Time (e.g., 11:00 AM)">
+        <button onclick="addTrain()">Add Train</button>
+    </div>
+
+    <!-- BUTTONS -->
+    <h2>Operations</h2>
+
+    <button onclick="getIrctcTrains()">Get IRCTC Trains</button>
+    <button onclick="fetchMmtViaWebClient()">Fetch MMT Trains (WebClient)</button>
+    <button onclick="getMmtTrains()">Get MMT Trains</button>
+
+    <!-- DISPLAY TABLE -->
+    <table id="trainTable">
+        <thead>
+            <tr>
+                <th>Train No</th>
+                <th>Train Name</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+
+        // ----------------------------
+        // POST → ADD TRAIN (IRCTC 8081)
+        // ----------------------------
+        function addTrain() {
+            const data = {
+                trainNo: document.getElementById("trainNo").value,
+                trainName: document.getElementById("trainName").value,
+                time: document.getElementById("time").value
+            };
+
+            fetch("http://localhost:8081/irctc/train", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(response => {
+                alert("Train Added Successfully!");
+                getIrctcTrains();  // Refresh table
+            })
+            .catch(err => console.error("Error:", err));
+        }
+
+        // ----------------------------
+        // GET IRCTC TRAINS (PORT 8081)
+        // ----------------------------
+        function getIrctcTrains() {
+            fetch("http://localhost:8081/irctc/trains")
+                .then(res => res.json())
+                .then(data => renderTable(data))
+                .catch(err => console.error("Error:", err));
+        }
+
+        // -------------------------------------------
+        // FETCH MMT TRAINS USING WebClient from IRCTC
+        // -------------------------------------------
+        function fetchMmtViaWebClient() {
+            fetch("http://localhost:8082/mmt/search")
+                .then(res => res.json())
+                .then(data => renderTable(data))
+                .catch(err => console.error("Error:", err));
+        }
+
+        // -------------------------
+        // GET MMT TRAINS (PORT 8082)
+        // -------------------------
+        function getMmtTrains() {
+            fetch("http://localhost:8082/mmt/trains")
+                .then(res => res.json())
+                .then(data => renderTable(data))
+                .catch(err => console.error("Error:", err));
+        }
+
+        // -------------------------
+        // TABLE RENDER FUNCTION
+        // -------------------------
+        function renderTable(trains) {
+            let tbody = document.querySelector("#trainTable tbody");
+            tbody.innerHTML = "";
+
+            trains.forEach(train => {
+                let row = `
+                    <tr>
+                        <td>${train.trainNo}</td>
+                        <td>${train.trainName}</td>
+                        <td>${train.time}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+    </script>
+</body>
+</html>

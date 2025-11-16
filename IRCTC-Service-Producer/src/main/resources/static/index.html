@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IRCTC & MMT Portal</title>
+
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: bold;
+            animation: slideIn 0.3s ease forwards;
+            z-index: 9999;
+        }
+
+        .toast.success {
+            background: #16a34a;
+        }
+
+        .toast.error {
+            background: #dc2626;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+        }
+    </style>
+</head>
+
+<body class="p-8">
+
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-10">
+        IRCTC – MMT Train Portal
+    </h1>
+
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
+
+        <!-- ADD TRAIN SECTION -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+            <h2 class="text-xl font-bold text-gray-700 mb-4">Add Train (IRCTC)</h2>
+
+            <form id="addTrainForm" class="space-y-4">
+
+                <div>
+                    <label class="font-semibold text-gray-700">Train Number</label>
+                    <input type="text" id="trainNo" required
+                        class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300">
+                </div>
+
+                <div>
+                    <label class="font-semibold text-gray-700">Train Name</label>
+                    <input type="text" id="trainName" required
+                        class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300">
+                </div>
+
+                <div>
+                    <label class="font-semibold text-gray-700">Time</label>
+                    <input type="text" id="time" placeholder="10:30" required
+                        class="w-full p-2 border rounded-lg focus:ring focus:ring-blue-300">
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-green-600 text-white py-2 rounded-lg font-bold hover:bg-green-700">
+                    Add Train
+                </button>
+            </form>
+        </div>
+
+        <!-- FETCH TRAIN SECTION -->
+        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+
+            <h2 class="text-xl font-bold text-gray-700 mb-4">Fetch IRCTC Trains</h2>
+            <button id="getIrctcTrains"
+                class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700">
+                Get IRCTC Trains
+            </button>
+
+            <h2 class="text-xl font-bold text-gray-700 mt-10 mb-4">Fetch MMT Trains (WebClient)</h2>
+            <button id="getMmtTrains"
+                class="w-full bg-purple-600 text-white py-2 rounded-lg font-bold hover:bg-purple-700">
+                Get MMT Trains
+            </button>
+        </div>
+    </div>
+
+    <!-- RESULT SECTION -->
+    <div id="resultSection" class="max-w-4xl mx-auto mt-12 hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Train List</h2>
+
+        <div class="overflow-auto bg-white border shadow-lg rounded-xl">
+            <table class="w-full">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="p-3">Train No</th>
+                        <th class="p-3">Name</th>
+                        <th class="p-3">Time</th>
+                    </tr>
+                </thead>
+                <tbody id="trainTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // SHOW TOAST
+        function showMessage(message, type) {
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = "slideOut 0.3s ease forwards";
+                setTimeout(() => toast.remove(), 300);
+            }, 2000);
+        }
+
+        // RENDER TRAIN TABLE
+        function renderTrains(data) {
+            const tableBody = document.getElementById("trainTableBody");
+            tableBody.innerHTML = "";
+
+            data.forEach(train => {
+                tableBody.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-3">${train.trainNo}</td>
+                        <td class="p-3">${train.trainName}</td>
+                        <td class="p-3">${train.time}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById("resultSection").classList.remove("hidden");
+        }
+
+        // ADD TRAIN (POST TO IRCTC)
+        document.getElementById("addTrainForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const train = {
+                trainNo: document.getElementById("trainNo").value,
+                trainName: document.getElementById("trainName").value,
+                time: document.getElementById("time").value
+            };
+
+            const res = await fetch("http://localhost:8081/irctc/train", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(train)
+            });
+
+            if (res.ok) {
+                showMessage("Train Added Successfully!", "success");
+                e.target.reset();
+            } else {
+                showMessage("Failed to Add Train!", "error");
+            }
+        });
+
+        // GET IRCTC TRAINS
+        document.getElementById("getIrctcTrains").addEventListener("click", async () => {
+            const res = await fetch("http://localhost:8081/irctc/trains");
+            const data = await res.json();
+            renderTrains(data);
+        });
+
+        // GET MMT TRAINS (USING WEBCLIENT)
+        document.getElementById("getMmtTrains").addEventListener("click", async () => {
+            const res = await fetch("http://localhost:8082/mmt/search");
+            const data = await res.json();
+            renderTrains(data);
+        });
+    </script>
+
+</body>
+</html>

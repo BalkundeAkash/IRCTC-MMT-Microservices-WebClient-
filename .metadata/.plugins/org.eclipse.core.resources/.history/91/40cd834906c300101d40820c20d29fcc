@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Train Search Portal</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100%;
+            color: #333;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .portal-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #e8e8e8;
+            margin-bottom: 0;
+        }
+
+        .search-section {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .add-train-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 2px dashed #dee2e6;
+            display: none;
+        }
+
+        .add-train-form.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #495057;
+        }
+
+        .form-input {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+
+        .trains-section {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .trains-container {
+            padding: 25px;
+        }
+
+        .train-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .train-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .train-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .train-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .train-name {
+            font-size: 1.1rem;
+            color: #495057;
+            margin-left: 10px;
+        }
+
+        .train-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .price {
+            color: #28a745;
+            font-size: 1.2rem;
+        }
+
+        .seats-available {
+            color: #17a2b8;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            max-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background: #28a745;
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .confirm-delete {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .confirm-delete.active {
+            display: block;
+        }
+
+        .confirm-buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .portal-title {
+                font-size: 2rem;
+            }
+            
+            .search-bar {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                min-width: 100%;
+            }
+            
+            .train-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .train-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <main class="container">
+   <header class="header">
+    <h1 class="portal-title" id="portalTitle">Train Search Portal</h1>
+    <p class="subtitle">Search and manage train schedules</p>
+   </header>
+   <section class="search-section">
+    <div class="search-bar"><input type="text" class="search-input" id="searchInput" placeholder="Search trains by number, name, or route..."> <button class="btn btn-secondary" onclick="clearSearch()">Clear</button> <button class="btn btn-primary" id="addTrainBtn" onclick="toggleAddForm()">Add New Train</button>
+    </div>
+    <div class="add-train-form" id="addTrainForm">
+     <h3 style="margin-top: 0; color: #495057;">Add New Train</h3>
+     <form id="trainForm" onsubmit="addTrain(event)">
+      <div class="form-grid">
+       <div class="form-group"><label class="form-label">Train Number</label> <input type="text" class="form-input" id="trainNo" required>
+       </div>
+       <div class="form-group"><label class="form-label">Train Name</label> <input type="text" class="form-input" id="trainName" required>
+       </div>
+       <div class="form-group"><label class="form-label">Departure Time</label> <input type="time" class="form-input" id="departure" required>
+       </div>
+       <div class="form-group"><label class="form-label">Arrival Time</label> <input type="time" class="form-input" id="arrival" required>
+       </div>
+       <div class="form-group"><label class="form-label">Duration</label> <input type="text" class="form-input" id="duration" placeholder="e.g., 5h 30m" required>
+       </div>
+       <div class="form-group"><label class="form-label">Price (₹)</label> <input type="number" class="form-input" id="price" min="0" required>
+       </div>
+       <div class="form-group"><label class="form-label">Available Seats</label> <input type="number" class="form-input" id="availableSeats" min="0" required>
+       </div>
+       <div class="form-group"><label class="form-label">Route</label> <input type="text" class="form-input" id="route" placeholder="e.g., Delhi - Mumbai" required>
+       </div>
+      </div>
+      <div style="display: flex; gap: 10px;"><button type="submit" class="btn btn-primary" id="submitBtn">Add Train</button> <button type="button" class="btn btn-secondary" onclick="toggleAddForm()">Cancel</button>
+      </div>
+     </form>
+    </div>
+   </section>
+   <section class="trains-section">
+    <div class="section-header"><span>Available Trains</span>
+    </div>
+    <div class="trains-container">
+     <div class="stats" id="stats">
+      <div class="stat-item">
+       <div class="stat-number" id="totalTrains">
+        0
+       </div>
+       <div class="stat-label">
+        Total Trains
+       </div>
+      </div>
+      <div class="stat-item">
+       <div class="stat-number" id="totalSeats">
+        0
+       </div>
+       <div class="stat-label">
+        Available Seats
+       </div>
+      </div>
+      <div class="stat-item">
+       <div class="stat-number" id="avgPrice">
+        ₹0
+       </div>
+       <div class="stat-label">
+        Average Price
+       </div>
+      </div>
+     </div>
+     <div id="trainsContainer">
+      <div class="loading" id="loadingState">
+       <div class="spinner"></div> Loading trains...
+      </div>
+     </div>
+    </div>
+   </section>
+  </main>
+  <script>
+        let trains = [];
+        let filteredTrains = [];
+        let pendingDelete = null;
+
+        const defaultConfig = {
+            portal_title: "Train Search Portal",
+            search_placeholder: "Search trains by number, name, or route...",
+            add_button_text: "Add New Train"
+        };
+
+        const dataHandler = {
+            onDataChanged(data) {
+                trains = data || [];
+                filteredTrains = [...trains];
+                renderTrains();
+                updateStats();
+                hideLoading();
+            }
+        };
+
+        async function initializeApp() {
+            try {
+                if (window.dataSdk) {
+                    const result = await window.dataSdk.init(dataHandler);
+                    if (!result.isOk) {
+                        console.error("Failed to initialize data SDK");
+                        hideLoading();
+                    }
+                }
+            } catch (error) {
+                console.error("Error initializing app:", error);
+                hideLoading();
+            }
+
+            // Initialize Elements SDK
+            if (window.elementSdk) {
+                await window.elementSdk.init({
+                    defaultConfig,
+                    onConfigChange: async (config) => {
+                        const title = config.portal_title || defaultConfig.portal_title;
+                        const searchPlaceholder = config.search_placeholder || defaultConfig.search_placeholder;
+                        const addButtonText = config.add_button_text || defaultConfig.add_button_text;
+
+                        document.getElementById('portalTitle').textContent = title;
+                        document.getElementById('searchInput').placeholder = searchPlaceholder;
+                        document.getElementById('addTrainBtn').textContent = addButtonText;
+                    },
+                    mapToCapabilities: (config) => ({
+                        recolorables: [],
+                        borderables: [],
+                        fontEditable: undefined,
+                        fontSizeable: undefined
+                    }),
+                    mapToEditPanelValues: (config) => new Map([
+                        ["portal_title", config.portal_title || defaultConfig.portal_title],
+                        ["search_placeholder", config.search_placeholder || defaultConfig.search_placeholder],
+                        ["add_button_text", config.add_button_text || defaultConfig.add_button_text]
+                    ])
+                });
+            }
+
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', handleSearch);
+        }
+
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            if (!query) {
+                filteredTrains = [...trains];
+            } else {
+                filteredTrains = trains.filter(train => 
+                    train.trainNo.toLowerCase().includes(query) ||
+                    train.trainName.toLowerCase().includes(query) ||
+                    train.route.toLowerCase().includes(query)
+                );
+            }
+            
+            renderTrains();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            filteredTrains = [...trains];
+            renderTrains();
+        }
+
+        function toggleAddForm() {
+            const form = document.getElementById('addTrainForm');
+            const btn = document.getElementById('addTrainBtn');
+            
+            if (form.classList.contains('active')) {
+                form.classList.remove('active');
+                btn.textContent = window.elementSdk?.config?.add_button_text || defaultConfig.add_button_text;
+                resetForm();
+            } else {
+                form.classList.add('active');
+                btn.textContent = 'Cancel';
+                document.getElementById('trainNo').focus();
+            }
+        }
+
+        async function addTrain(event) {
+            event.preventDefault();
+            
+            if (trains.length >= 999) {
+                showMessage("Maximum limit of 999 trains reached. Please delete some trains first.", "error");
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span>Adding...';
+
+            const trainData = {
+                trainNo: document.getElementById('trainNo').value.trim(),
+                trainName: document.getElementById('trainName').value.trim(),
+                departure: document.getElementById('departure').value,
+                arrival: document.getElementById('arrival').value,
+                duration: document.getElementById('duration').value.trim(),
+                price: parseInt(document.getElementById('price').value),
+                availableSeats: parseInt(document.getElementById('availableSeats').value),
+                route: document.getElementById('route').value.trim()
+            };
+
+            // Check for duplicate train numbers
+            if (trains.some(train => train.trainNo === trainData.trainNo)) {
+                showMessage("Train number already exists. Please use a different number.", "error");
+                resetSubmitButton();
+                return;
+            }
+
+            try {
+                if (window.dataSdk) {
+                    const result = await window.dataSdk.create(trainData);
+                    
+                    if (result.isOk) {
+                        showMessage("Train added successfully!", "success");
+                        resetForm();
+                        toggleAddForm();
+                    } else {
+                        showMessage("Failed to add train. Please try again.", "error");
+                    }
+                } else {
+                    showMessage("Data storage not available.", "error");
+                }
+            } catch (error) {
+                showMessage("An error occurred while adding the train.", "error");
+            }
+
+            resetSubmitButton();
+        }
+
+        function resetSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Add Train';
+        }
+
+        function resetForm() {
+            document.getElementById('trainForm').reset();
+        }
+
+        function showDeleteConfirm(train, cardElement) {
+            // Hide any existing confirmation
+            hideDeleteConfirm();
+            
+            const confirmDiv = document.createElement('div');
+            confirmDiv.className = 'confirm-delete active';
+            confirmDiv.innerHTML = `
+                <div>Are you sure you want to delete train ${train.trainNo} - ${train.trainName}?</div>
+                <div class="confirm-buttons">
+                    <button class="btn btn-danger btn-small" onclick="confirmDelete('${train.__backendId}')">Delete</button>
+                    <button class="btn btn-secondary btn-small" onclick="hideDeleteConfirm()">Cancel</button>
+                </div>
+            `;
+            
+            cardElement.appendChild(confirmDiv);
+            pendingDelete = train;
+        }
+
+        function hideDeleteConfirm() {
+            const confirmDivs = document.querySelectorAll('.confirm-delete');
+            confirmDivs.forEach(div => div.remove());
+            pendingDelete = null;
+        }
+
+        async function confirmDelete(trainId) {
+            if (!pendingDelete) return;
+            
+            try {
+                if (window.dataSdk) {
+                    const result = await window.dataSdk.delete(pendingDelete);
+                    
+                    if (result.isOk) {
+                        showMessage("Train deleted successfully!", "success");
+                    } else {
+                        showMessage("Failed to delete train. Please try again.", "error");
+                    }
+                } else {
+                    showMessage("Data storage not available.", "error");
+                }
+            } catch (error) {
+                showMessage("An error occurred while deleting the train.", "error");
+            }
+            
+            hideDeleteConfirm();
+        }
+
+        function renderTrains() {
+            const container = document.getElementById('trainsContainer');
+            
+            if (filteredTrains.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🚂</div>
+                        <h3>No trains found</h3>
+                        <p>${trains.length === 0 ? 'Add your first train to get started!' : 'Try adjusting your search criteria.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredTrains.map(train => `
+                <div class="train-card" id="train-${train.__backendId}">
+                    <button class="delete-btn" onclick="showDeleteConfirm(${JSON.stringify(train).replace(/"/g, '&quot;')}, document.getElementById('train-${train.__backendId}'))" title="Delete train">×</button>
+                    <div class="train-header">
+                        <div>
+                            <span class="train-number">${train.trainNo}</span>
+                            <span class="train-name">${train.trainName}</span>
+                        </div>
+                    </div>
+                    <div class="train-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Departure</div>
+                            <div class="detail-value">${formatTime(train.departure)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Arrival</div>
+                            <div class="detail-value">${formatTime(train.arrival)}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Duration</div>
+                            <div class="detail-value">${train.duration}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Price</div>
+                            <div class="detail-value price">₹${train.price}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Available Seats</div>
+                            <div class="detail-value seats-available">${train.availableSeats}</div>
+                        </div>
+                        <div class="detail-item" style="grid-column: 1 / -1;">
+                            <div class="detail-label">Route</div>
+                            <div class="detail-value">${train.route}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            const totalTrains = trains.length;
+            const totalSeats = trains.reduce((sum, train) => sum + train.availableSeats, 0);
+            const avgPrice = totalTrains > 0 ? Math.round(trains.reduce((sum, train) => sum + train.price, 0) / totalTrains) : 0;
+
+            document.getElementById('totalTrains').textContent = totalTrains;
+            document.getElementById('totalSeats').textContent = totalSeats;
+            document.getElementById('avgPrice').textContent = `₹${avgPrice}`;
+        }
+
+        function formatTime(timeString) {
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${minutes} ${ampm}`;
+        }
+
+        function hideLoading() {
+            const loadingState = document.getElementById('loadingState');
+            if (loadingState) {
+                loadingState.style.display = 'none';
+            }
+        }
+
+        function showMessage(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99f83842d5e77629',t:'MTc2MzMwOTAyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

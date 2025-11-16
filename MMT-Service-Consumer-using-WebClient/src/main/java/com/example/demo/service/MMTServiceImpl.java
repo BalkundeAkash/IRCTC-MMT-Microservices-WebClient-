@@ -1,0 +1,29 @@
+package com.example.demo.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import com.example.demo.entity.Train;
+
+@Service
+public class MMTServiceImpl implements MMTService{
+
+    @Autowired
+    private WebClient webClient;   // injected bean
+
+    public List<Train> fetchFromIRCTC(String src, String dest, String date) {
+
+        String url = "http://localhost:8081/irctc/search?src=" 
+                + src + "&dest=" + dest + "&date=" + date;
+
+        return webClient.get()
+                .uri(url)
+                .retrieve()
+                .bodyToFlux(Train.class)
+                .collectList()
+                .block();  // converting reactive → normal
+    }
+}
