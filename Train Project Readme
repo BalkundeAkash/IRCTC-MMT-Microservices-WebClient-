@@ -1,0 +1,167 @@
+# 🚆 Train Management System
+│ │ │ │ └── TrainRepo.java
+│ │ │ │
+│ │ │ └── 📁 entity/
+│ │ │ └── Train.java
+│ │ │
+│ │ ├── 📁 resources/
+│ │ │ ├── application.properties
+│ │ │ ├── static/
+│ │ │ │ └── style.css
+│ │ │ └── templates/
+│ │ │ ├── index.html
+│ │ │ ├── add-train.html
+│ │ │ └── success.html
+│
+├── 📁 test/
+│ └── (test cases)
+│
+├── pom.xml
+├── README.md
+└── .gitignore
+```
+
+                    Project Architecture
+
+                  +------------------+
+                  |  Frontend (UI)   |
+                  |  index.html      |
+                  +--------+---------+
+                           |
+                           v
+        +-----------------------------------------+
+        |              MMT Service                |
+        |         (Port: 8082, WebClient)         |
+        +-------------------+---------------------+
+                            |
+                            | HTTP (GET)
+                            v
+        +-----------------------------------------+
+        |              IRCTC Service              |
+        |      (Port: 8081, PostgreSQL DB)        |
+        +-------------------+---------------------+
+                            |
+                            | JPA (INSERT/SELECT)
+                            v
+                    +-------------------+
+                    |   PostgreSQL      |
+                    +-------------------+
+
+
+
+---
+
+
+## ⚙️ Technologies Used
+- Java 17+
+- Spring Boot
+- Spring MVC
+- Spring Data JPA
+- Thymeleaf
+- H2 / MySQL
+- HTML / CSS
+
+
+## ▶️ How to Run the Project
+### **1️⃣ Clone the repository**
+```bash
+git clone <your-repo-url>
+cd IRCTC-MMT-Microservices-WebClient-
+```
+
+
+### **2️⃣ Build & Run**
+```bash
+mvn spring-boot:run
+```
+
+
+### **3️⃣ Open UI in Browser**
+```
+http://localhost:8080/
+```
+
+
+---
+
+
+## 📌 Features
+### ✔ Add Train Details
+### ✔ View All Trains
+### ✔ Stored in DB using JPA
+### ✔ Simple UI
+
+
+---
+
+
+## 🔌 API Endpoints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Home Page |
+| GET | `/addTrain` | Form Page |
+| POST | `/saveTrain` | Save Train |
+| GET | `/allTrains` | View Trains |
+
+🧪 API ENDPOINTS
+🚆 IRCTC Service – (Port: 8081)
+
+Manages train data & stores it into PostgreSQL.
+
+1. Add Train (POST)
+POST /irctc/train
+Request Body
+
+{
+  "trainNo": "13002",
+  "trainName": "Mumbai Express",
+  "time": "11:00 AM"
+}
+
+➤ 2. Get All Trains (GET)
+GET /irctc/trains
+
+
+Sample Response
+
+[
+  {
+    "trainNo": "13002",
+    "trainName": "Mumbai Express",
+    "time": "11:00 AM"
+  }
+]
+
+🧳 MMT Service – (Port: 8082)
+
+Fetches data from IRCTC using WebClient.
+
+➤ 3. Fetch All Trains from IRCTC (via WebClient)
+GET /mmt/search
+
+
+Internally Calls →
+
+http://localhost:8081/irctc/trains
+
+
+Sample Response
+
+[
+  {
+    "trainNo": "13002",
+    "trainName": "Mumbai Express",
+    "time": "11:00 AM"
+  }
+]
+
+
+## 📜 License
+This project is for educational purposes.
+
+
+---
+
+
+## ✨ Author
+**Akash Balkunde**
